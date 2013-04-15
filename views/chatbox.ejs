@@ -1,0 +1,10 @@
+<ul class="chat-box">
+<% if (typeof messages != "undefined") { %>
+<% for (var i =0; i < messages.length; i++) { %>
+	<li><b><%= messages[i].author %> :</b> <%= messages.content %></li>
+<% } //end for %>
+<% } //end if %>
+</ul>
+<div class="chat-input-box">
+	<input type="text" class="chat-input-message" placeholder="Type your message here..." />
+</div>
