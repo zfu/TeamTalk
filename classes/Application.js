@@ -1,4 +1,6 @@
-var userManager = require("./UserManager");
+var Util = require("./Util"),
+	TopicController = require("./TopicController"),
+	userManager = require("./UserManager");
 var cookie = require("express/node_modules/cookie");
 var parseSignedCookie = require('express/node_modules/connect').utils.parseSignedCookie;
 var ejs = require("ejs");
@@ -6,12 +8,14 @@ var ejs = require("ejs");
 
 var Application = function () {
 	this.chatRooms = {};
+	this.topicController = new TopicController();
 };
 
 Application.prototype = {
 
 	express : null,
 	chatRooms : null,
+	topicController : null,
 	
 	setConfig : function (config) {
 		if (config.express) this.express = config.express;
@@ -43,13 +47,16 @@ Application.prototype = {
 	 */
 	initSocket : function (socket) {
 		var that = this;
-		this.socketBind(socket, "login", this.onLogin);
-		this.socketBind(socket, "signup", this.onSignup);
-		this.socketBind(socket, "logout", this.onLogout);
-		this.socketBind(socket, "disconnect", this.onDisconnect);
-		this.socketBind(socket, "users", this.onUsers);
-		this.socketBind(socket, "newchat", this.onNewChat);
-		this.socketBind(socket, "chatmsg", this.onChatMessage);
+		Util.socketBind(socket, "login", this.onLogin, this);
+		Util.socketBind(socket, "signup", this.onSignup, this);
+		Util.socketBind(socket, "logout", this.onLogout, this);
+		Util.socketBind(socket, "disconnect", this.onDisconnect, this);
+		Util.socketBind(socket, "users", this.onUsers, this);
+		Util.socketBind(socket, "newchat", this.onNewChat, this);
+		Util.socketBind(socket, "chatmsg", this.onChatMessage, this);
+		Util.socketBind(socket, "group", this.onGroup, this);
+
+		this.topicController.plugSocket(socket);
 
 		this.getSession(socket, function (err, session) {
 			if (!err && session && session.uid) {
@@ -99,6 +106,7 @@ Application.prototype = {
 			password,
 			function (user) {
 				// connection successful
+				socket.emit("notify", "You are connected.");
 				that.setUserCookie(socket, user, function () {
 					// set user online
 					that.setUserOnline(user, function () {
@@ -269,21 +277,27 @@ Application.prototype = {
 	 * @param socket
 	 * @param data
 	 */
-	onChatMessage : function (socket, params) {
+	onChatMessage : function (socket, data) {
 		var that = this;
 		this.getUserBySocket(socket, function (user) {
-			var data = {
-				message : params.message,
-				from : user.username,
+			var message = {
+				text : data.message,
+				author : user.username,
 				time : new Date(),
-				room : params.room
+				room : data.room
 			};
 			// TODO: save in db
-			var room = that.chatRooms[data.room];
+			var room = that.chatRooms[message.room];
 			for (var id in room) {
-				room[id].emit("chatmsg", data);
+				room[id].emit("chatmsg", message);
 			}
 		});
+	},
+
+	onGroup : function (socket, data) {
+		//TODO: create group if no id
+		//TODO: update group if id
+		//TODO: notify new people in group
 	}
 }
 

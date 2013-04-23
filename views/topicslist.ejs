@@ -1,0 +1,14 @@
+<ul class="topics-list">
+	<% for (var i = 0; i < topics.length; i++) { %>
+	<% var topic = topics[i]; %>
+	<li>
+		<div class="topic-title"><%= topic.title %></div>
+		<div class="topic-date"><%= topic.date %></div>
+		<ul class="topic-tags">
+			<% for (var i = 0; i < topic.tags.length; i++) { %>
+			<li><a href="#"><%= topics.tags[i] %></a></li>
+			<% } %>
+		</ul>
+	</li>
+	<% } %>
+</ul>

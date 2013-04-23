@@ -1,0 +1,12 @@
+<div class="group-details">
+	<div class="group-name"><%= group.name %></div>
+	<div class="group-key"><%= group.key %></div>
+	<ul class="group-users">
+		<% for (var i = 0; i < group.users.length; i++) { %>
+		<% var user = group.users[i]; %>
+		<li class="user-tiny-area">
+			<span class="user-status user-status-<%= user.status %>"></span>
+			<a class="user-name" href=""><%= user.username %></a>
+		</li>
+	</ul>
+</div>

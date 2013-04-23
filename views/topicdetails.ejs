@@ -1,0 +1,21 @@
+<div class="topic-details">
+	<div class="topic-details-head">
+		<div class="topic-author"><%= topic.author %></div>
+		<div class="topic-updatedate"><%= topic.lastupdate %></div>
+		<ul class="topic-tags">
+			<% for (var i = 0; i < topic.tags.length; i++) { %>
+			<li><a href="">#<%= topic.tags[i] %></a></li>
+			<% } %>
+		</ul>
+	</div>
+	<ul class="topic-messages">
+		<% for (var i = 0; i < topic.messages.length; i++) { %>
+		<% var message = topic.messages[i]; %>
+		<li>
+			<div class="topic-message-author"><%= message.author %></div>
+			<div class="topic-message-date"><%= message.date %></div>
+			<div class="topic-message-content"><%= message.text %></div>
+		</li>
+		<% } %>
+	</ul>
+</div>

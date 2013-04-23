@@ -1,14 +1,17 @@
 var socket = null;
+var notifyTimer = null;
+var notifyList = [];
+var errorsList = [];
 
 $(function () {
 	socket = io.connect('http://'+window.location.host);
 
 	socket.on('error', function (message) {
-		console.log("Error : " + message);
+		error(message);
 	});
 
 	socket.on('notify', function (message) {
-		console.log("Notify : " + message);
+		notify(message);
 	});
 
 	socket.on('login', function (data) {
@@ -43,8 +46,8 @@ $(function () {
 
 	socket.on('chatmsg', function (data) {
 		var li = $("<li />");
-		li.append($("<b />").text(data.from + " :"));
-		li.append(" " + data.message);
+		li.append($("<b />").text(data.author + " :"));
+		li.append(" " + data.text);
 		$(".chatbox-"+data.room+"-area .chat-box").append(li);
 	});
 
@@ -52,9 +55,13 @@ $(function () {
 		$(".login-form").each(function () {
 			var form = $(this);
 			form.find("button").click(function () {
+				var command = $(this).hasClass("btn-login") ? "login" : "signup";
+				form.attr("command", command);
+			});
+			form.submit(function () {
 				var username = form.find(".username").val();
 				var password = form.find(".password").val();
-				var command = $(this).hasClass("btn-login") ? "login" : "signup";
+				var command = $(this).attr("command");
 				socket.emit(command, username, password);
 				return false;
 			});
@@ -105,4 +112,37 @@ $(function () {
 		socket.emit('newchat', {room:room});
 		return false;
 	});
+
+	function notify (message) {
+		notifyList.push(message);
+		if (!notifyTimer) {
+			displayNotification();
+		}
+	}
+
+	function displayNotification () {
+		if (notifyList.length == 0) {
+			return;
+		}
+		$(".notification-box").text(notifyList[0])
+			.fadeIn(500, function () {
+				notifyTimer = setTimeout(function () {
+					$(".notification-box").fadeOut(500, function () {
+						notifyTimer = null;
+						notifyList.shift();
+						displayNotification();
+					});
+				}, 2000);
+			});
+	}
+
+	$(".error-box button").click(function () {
+		$(".error-box").hide();
+	});
+
+	function error (message) {
+		errorsList.push(message);
+		$(".error-box-message").text(message);
+		$(".error-box").fadeIn(500);
+	}
 });

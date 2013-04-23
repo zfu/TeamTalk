@@ -27,15 +27,3 @@ var ChatSchema = new mongoose.Schema({
 });
 ChatModel = mongoose.model("chats", ChatSchema);
 
-/**
- * Topic
- */
-var TopicSchema = new mongoose.Schema({
-	title : String,
-	message : String,
-	author : String,
-	tags : Array,
-	privacy : Array,
-	creationdate : Date
-});
-TopicModel = mongoose.model("topics", TopicSchema);
