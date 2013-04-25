@@ -1,8 +1,13 @@
 
-var Util = require("./Util"),
+var utilSocket = require("./Util").Socket,
 	GroupManager = require("./GroupManager"),
 	ejs = require("ejs");
 
+/**
+ * Controller for group features
+ * @constructor
+ * @class GroupController
+ */
 var GroupController = function () {
 	this._manager = new GroupManager();
 };
@@ -21,15 +26,15 @@ GroupController.prototype = {
 	 */
 	plugSocket : function (socket) {
 		// grouphome
-		Util.socketBind(socket, "grouphome", this.onGroupHome, this);
+		utilSocket.bind(socket, "grouphome", this.onGroupHome, this);
 		// groupform
-		Util.socketBind(socket, "groupform", this.onGroupForm, this);
+		utilSocket.bind(socket, "groupform", this.onGroupForm, this);
 		// addgroup
-		Util.socketBind(socket, "addgroup", this.onAddGroup, this);
+		utilSocket.bind(socket, "addgroup", this.onAddGroup, this);
 		// editgroup
-		Util.socketBind(socket, "editgroup", this.onEditGroup, this);
+		utilSocket.bind(socket, "editgroup", this.onEditGroup, this);
 		// group
-		Util.socketBind(socket, "group", this.onGroup, this);
+		utilSocket.bind(socket, "group", this.onGroup, this);
 	},
 
 	/**
@@ -39,7 +44,9 @@ GroupController.prototype = {
 	 * @param data
 	 */
 	onGroupHome : function (socket, data) {
-
+		ejs.renderFile("./views/groupform.ejs", function (err, html) {
+			socket.emit("groupform", {html : html});
+		});
 	},
 
 	/**

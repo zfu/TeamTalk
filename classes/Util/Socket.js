@@ -1,17 +1,17 @@
 /**
  *
- * @class Util
+ * @class Util.Socket
  */
-var Util = {
+var Socket = {
 
 	/**
-	 * Plug listener to socket event
+	 * Add listener to socket event
 	 * @param socket
 	 * @param event
 	 * @param method
 	 * @param instance
 	 */
-	socketBind : function (socket, event, method, instance) {
+	bind : function (socket, event, method, instance) {
 		socket.on(event, function () {
 			var params = [socket];
 			for (var i = 0; i < arguments.length; i++) {
@@ -23,6 +23,4 @@ var Util = {
 
 };
 
-Util.Socket = require("./Util/Socket");
-
-module.exports = Util;
+module.exports = Socket;

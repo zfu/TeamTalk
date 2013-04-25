@@ -51,6 +51,10 @@ $(function () {
 		$(".chatbox-"+data.room+"-area .chat-box").append(li);
 	});
 
+	socket.on('groupform', function (data) {
+		console.log(data);
+	});
+
 	function connectLoginForm () {
 		$(".login-form").each(function () {
 			var form = $(this);
@@ -59,8 +63,8 @@ $(function () {
 				form.attr("command", command);
 			});
 			form.submit(function () {
-				var username = form.find(".username").val();
-				var password = form.find(".password").val();
+				var username = form.find(".login-username").val();
+				var password = form.find(".login-password").val();
 				var command = $(this).attr("command");
 				socket.emit(command, username, password);
 				return false;
@@ -110,6 +114,16 @@ $(function () {
 		var room = "default";
 		if ($("chatbox-"+room+"-area").size() != 0) return false;
 		socket.emit('newchat', {room:room});
+		return false;
+	});
+
+	$(".nav-topics").click(function () {
+		socket.emit('topichome');
+		return false;
+	});
+
+	$(".nav-groups").click(function () {
+		socket.emit('grouphome');
 		return false;
 	});
 

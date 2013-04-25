@@ -1,14 +1,28 @@
 var Util = require("./Util"),
 	TopicController = require("./TopicController"),
-	userManager = require("./UserManager");
-var cookie = require("express/node_modules/cookie");
-var parseSignedCookie = require('express/node_modules/connect').utils.parseSignedCookie;
-var ejs = require("ejs");
+	UserManager = require("./UserManager"),
+	cookie = require("express/node_modules/cookie"),
+	parseSignedCookie = require('express/node_modules/connect').utils.parseSignedCookie,
+	ejs = require("ejs");
+
+
+// TODO : model declaration have to be moved in managers
+/**
+ * Chat
+ */
+var ChatSchema = new mongoose.Schema({
+	message : String,
+	author : String,
+	room : String,
+	creationdate : Date
+});
+ChatModel = mongoose.model("chats", ChatSchema);
 
 
 var Application = function () {
 	this.chatRooms = {};
 	this.topicController = new TopicController();
+	this.userManager = new UserManager();
 };
 
 Application.prototype = {
@@ -60,7 +74,7 @@ Application.prototype = {
 
 		this.getSession(socket, function (err, session) {
 			if (!err && session && session.uid) {
-				userManager.getUserById(session.uid, function (user) {
+				that.userManager.getUserById(session.uid, function (user) {
 					that.setUserOnline(user, function () {
 						that.sendConnectedArea(socket, user);
 					});
@@ -101,7 +115,7 @@ Application.prototype = {
 	 */
 	onLogin : function (socket, username, password) {
 		var that = this;
-		userManager.login(
+		this.userManager.login(
 			username,
 			password,
 			function (user) {
@@ -128,7 +142,7 @@ Application.prototype = {
 	 * @param password
 	 */
 	onSignup : function (socket, username, password) {
-		userManager.signup(
+		this.userManager.signup(
 			username,
 			password,
 			function () {
@@ -146,7 +160,7 @@ Application.prototype = {
 	 * @param socket
 	 */
 	onLogout : function (socket) {
-		userManager.logout(socket.handshake.uid);
+		this.userManager.logout(socket.handshake.uid);
 		//TODO: leave chat room
 		delete socket.handshake.uid;
 		this.sendLoginForm(socket);
@@ -157,7 +171,7 @@ Application.prototype = {
 	 * @param socket
 	 */
 	onDisconnect : function (socket) {
-		userManager.logout(socket.handshake.uid);
+		this.userManager.logout(socket.handshake.uid);
 		//TODO: leave chat room
 	},
 
@@ -215,9 +229,10 @@ Application.prototype = {
 	 * @param callback
 	 */
 	getUserBySocket : function (socket, callback) {
+		var that = this;
 		this.getSession(socket, function (err, session) {
 			if (!err && session && session.uid) {
-				userManager.getUserById(session.uid, function (user) {
+				that.userManager.getUserById(session.uid, function (user) {
 					callback(user);
 				});
 			} else {
@@ -237,7 +252,7 @@ Application.prototype = {
 	 * @param params
 	 */
 	onUsers : function (socket, params) {
-		userManager.getUsersList(
+		this.userManager.getUsersList(
 			params,
 			function (users) {
 				ejs.renderFile("./views/userslist.ejs", {users:users}, function (err, html) {

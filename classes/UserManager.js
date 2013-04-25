@@ -1,6 +1,16 @@
 require("./Exception");
 
-UserManager = function () {
+var UserSchema = new mongoose.Schema({
+	username : String,
+	password : String,
+	status : String,
+	lastvisit : Date,
+	creationdate : Date
+});
+UserModel = mongoose.model("users", UserSchema);
+
+
+var UserManager = function () {
 
 }
 
@@ -102,4 +112,4 @@ UserManager.prototype = {
 	}
 }
 
-module.exports = new UserManager();
+module.exports = UserManager;
