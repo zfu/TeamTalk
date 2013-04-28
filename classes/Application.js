@@ -1,5 +1,6 @@
 var Util = require("./Util"),
 	TopicController = require("./TopicController"),
+	GroupController = require("./GroupController"),
 	UserManager = require("./UserManager"),
 	cookie = require("express/node_modules/cookie"),
 	parseSignedCookie = require('express/node_modules/connect').utils.parseSignedCookie,
@@ -22,6 +23,7 @@ ChatModel = mongoose.model("chats", ChatSchema);
 var Application = function () {
 	this.chatRooms = {};
 	this.topicController = new TopicController();
+	this.groupController = new GroupController();
 	this.userManager = new UserManager();
 };
 
@@ -30,6 +32,7 @@ Application.prototype = {
 	express : null,
 	chatRooms : null,
 	topicController : null,
+	groupController : null,
 	
 	setConfig : function (config) {
 		if (config.express) this.express = config.express;
@@ -71,6 +74,7 @@ Application.prototype = {
 		Util.socketBind(socket, "group", this.onGroup, this);
 
 		this.topicController.plugSocket(socket);
+		this.groupController.plugSocket(socket);
 
 		this.getSession(socket, function (err, session) {
 			if (!err && session && session.uid) {
@@ -160,9 +164,16 @@ Application.prototype = {
 	 * @param socket
 	 */
 	onLogout : function (socket) {
+		var that = this;
 		this.userManager.logout(socket.handshake.uid);
 		//TODO: leave chat room
 		delete socket.handshake.uid;
+		this.getSession(socket, function (err, session) {
+			if (!err && session && session.uid) {
+				delete session.uid;
+				that.express.sessionStore.set(socket.handshake.sid, session);
+			}
+		});
 		this.sendLoginForm(socket);
 	},
 

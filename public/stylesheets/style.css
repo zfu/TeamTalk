@@ -64,6 +64,15 @@ section.main-content ul.tabs li {
 	cursor:pointer;
 }
 
+section.main-content ul.tabs a.tab-close {
+	margin-left: 5px;
+	padding: 1px 5px;
+	border-radius: 8px;
+	background-color:#555;
+	color:#fff;
+	font-size:10px;
+}
+
 section.main-content ul.tabs li.active {
 	border-bottom-color:#fff;
 }

@@ -53,9 +53,8 @@ GroupController.prototype = {
 	 * Called when socket receives the "groupform" event
 	 * Emits group form in html
 	 * @param socket
-	 * @param data
 	 */
-	onGroupForm : function (socket, data) {
+	onGroupForm : function (socket) {
 		ejs.renderFile("./views/groupform.ejs", function (err, html) {
 			socket.emit("groupform", {html : html});
 		});
@@ -69,8 +68,12 @@ GroupController.prototype = {
 	 */
 	onAddGroup : function (socket, data) {
 		var that = this;
-		this._manager.addGroup(data, function (err, group) {
-			that.emitGroup(socket, group._id);
+		this._manager.createGroup(data, function (err, group) {
+			if (err) {
+				socket.emit('error', err.getMessage());
+			} else {
+				that.emitGroup(socket, group);
+			}
 		});
 	},
 
@@ -82,8 +85,8 @@ GroupController.prototype = {
 	 */
 	onEditGroup : function (socket, data) {
 		var that = this;
-		this._manager.editGroup(data, function (err, group) {
-			that.emitGroup(socket, group._id);
+		this._manager.updateGroup(data, function (err, group) {
+			that.emitGroup(socket, group);
 		});
 	},
 
@@ -94,7 +97,7 @@ GroupController.prototype = {
 	 * @param data
 	 */
 	onGroup : function (socket, data) {
-		this.emitGroup(socket, data.id);
+		this.emitGroupById(socket, data.id);
 	},
 
 	/**
@@ -102,11 +105,21 @@ GroupController.prototype = {
 	 * @param socket
 	 * @param id
 	 */
-	emitGroup : function (socket, id) {
+	emitGroupById : function (socket, id) {
+		var that = this;
 		this._manager.getGroupById(id, function (err, group) {
-			ejs.renderFile("./views/groupdetails.ejs", {group : group}, function (err, html) {
-				socket.emit("group", {html : html});
-			});
+			that.emitGroup(socket, group);
+		});
+	},
+
+	/**
+	 * Emits group data in html
+	 * @param socket
+	 * @param group
+	 */
+	emitGroup : function (socket, group) {
+		ejs.renderFile("./views/groupdetails.ejs", {group : group}, function (err, html) {
+			socket.emit("group", {html : html, group : group});
 		});
 	}
 

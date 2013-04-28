@@ -52,7 +52,13 @@ $(function () {
 	});
 
 	socket.on('groupform', function (data) {
-		console.log(data);
+		tabContent("group-form-area", "New Group", data.html);
+		connectGroupForm();
+	});
+
+	socket.on('group', function (data) {
+		tabContent("group-area", data.group.name, data.html);
+		connectGroupForm();
 	});
 
 	function connectLoginForm () {
@@ -70,7 +76,18 @@ $(function () {
 				return false;
 			});
 		});
-	}
+	};
+
+	function connectGroupForm () {
+		$(".group-form").submit(function () {
+			var data = {
+				name : $(this).find(".group-name").val(),
+				key : $(this).find(".group-key").val()
+			};
+			socket.emit("addgroup", data);
+			return false;
+		});
+	};
 
 	function switchTab (key) {
 		$(".tabs li.active").removeClass("active");
@@ -84,11 +101,26 @@ $(function () {
 		var tab = tabs.find("li."+key);
 		if (tab.size() == 0) {
 			tabs.find(".active").removeClass("active");
-			tab = $("<li />").addClass(key).addClass("active").text(label);
+			var title = $("<span />").addClass("tab-name").text(label);
+			var close = $("<a />").addClass("tab-close").text("x");
+			close.click(function () {
+				var li = $(this).parent();
+				li.removeClass("active");
+				var key = li.attr('class');
+				li.remove();
+				$(".main-content section."+key).remove();
+				return false;
+			});
+			tab = $("<li />")
+				.addClass(key)
+				.addClass("active")
+				.append(title)
+				.append(close);
 			tab.click(function () {
-				if ($(this).hasClass("active")) return;
+				if ($(this).hasClass("active")) return false;
 				var key = $(this).attr('class');
 				switchTab(key);
+				return false;
 			});
 			tabs.append(tab);
 		} else {

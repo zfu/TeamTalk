@@ -1,11 +1,11 @@
-require("./Exception");
+var Exception = require("./Exception");
 
 var UserSchema = new mongoose.Schema({
 	username : String,
 	password : String,
 	status : String,
-	lastvisit : Date,
-	creationdate : Date
+	lastvisit : { type: Date, default: Date.now },
+	creationdate : { type: Date, default: Date.now }
 });
 UserModel = mongoose.model("users", UserSchema);
 
@@ -50,9 +50,7 @@ UserManager.prototype = {
 				var object = {
 					username : username,
 					password : password,
-					status : "offline",
-					lastvisit : new Date(),
-					creationdate : new Date()
+					status : "offline"
 				};
 				var user = new UserModel(object);
 				user.save(function (err) {
