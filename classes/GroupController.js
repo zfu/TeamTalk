@@ -7,8 +7,10 @@ var utilSocket = require("./Util").Socket,
  * Controller for group features
  * @constructor
  * @class GroupController
+ * @param app
  */
-var GroupController = function () {
+var GroupController = function (app) {
+	if (app) this._application = app;
 	this._manager = new GroupManager();
 };
 
@@ -21,19 +23,20 @@ GroupController.prototype = {
 	_manager : null,
 
 	/**
+	 * Reference to application
+	 * @type Application
+	 */
+	_application : null,
+
+	/**
 	 * Binds methods on socket events
 	 * @param socket
 	 */
 	plugSocket : function (socket) {
-		// grouphome
 		utilSocket.bind(socket, "grouphome", this.onGroupHome, this);
-		// groupform
 		utilSocket.bind(socket, "groupform", this.onGroupForm, this);
-		// addgroup
 		utilSocket.bind(socket, "addgroup", this.onAddGroup, this);
-		// editgroup
 		utilSocket.bind(socket, "editgroup", this.onEditGroup, this);
-		// group
 		utilSocket.bind(socket, "group", this.onGroup, this);
 	},
 
@@ -72,6 +75,7 @@ GroupController.prototype = {
 			if (err) {
 				socket.emit('error', err.getMessage());
 			} else {
+				socket.emit("groupform", {close : true});
 				that.emitGroup(socket, group);
 			}
 		});

@@ -7,7 +7,7 @@ var UserSchema = new mongoose.Schema({
 	lastvisit : { type: Date, default: Date.now },
 	creationdate : { type: Date, default: Date.now }
 });
-UserModel = mongoose.model("users", UserSchema);
+var UserModel = mongoose.model("users", UserSchema);
 
 
 var UserManager = function () {
@@ -79,32 +79,29 @@ UserManager.prototype = {
 		});
 	},
 
-	getUsersList : function (params, success, fail) {
-
-		UserModel.find(null, {username:1, status:1, lastvisit:1}, function (err, result) {
+	getUsersList : function (params, fn) {
+		UserModel.find(null, {username : 1, status : 1, lastvisit : 1}, function (err, result) {
 			if (err) {
-				// an error occurred
-				if (typeof fail == "function") {
-					fail(new Exception(UserManager.prototype.ERROR_LIST_USERS));
-				}
-			} else if (result.length > 0) {
-				// request successful
-				if (typeof success == "function") {
-					success(result);
-				}
+				fn(err);
 			} else {
-				// request successful but no result
-				if (typeof fail == "function") {
-					fail(new Exception(UserManager.prototype.NO_USERS));
-				}
+				fn(null, result);
 			}
 		});
 	},
 
-	getUserById : function (uid, callback) {
-		UserModel.find({_id:uid}, {password:0}, function (err, result) {
-			if (!err && result.length == 1) {
-				callback(result[0]);
+	/**
+	 * Returns specified user
+	 * @param uid
+	 * @param fn
+	 */
+	getUserById : function (uid, fn) {
+		UserModel.find({_id : uid}, {password : 0}, function (err, result) {
+			if (!err && result.length > 0) {
+				fn(null, result[0]);
+			} else if (!err && result.length == 0) {
+				fn(new Exception("User not found."));
+			} else {
+				fn(err);
 			}
 		});
 	}

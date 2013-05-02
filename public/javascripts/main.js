@@ -29,7 +29,7 @@ $(function () {
 		}
 	});
 
-	socket.on('users', function (data) {
+	socket.on('userslist', function (data) {
 		tabContent("users-area", "Users", data.html);
 	});
 
@@ -52,6 +52,10 @@ $(function () {
 	});
 
 	socket.on('groupform', function (data) {
+		if (data.close) {
+			$(".tabs .group-form-area .tab-close").click();
+			return;
+		}
 		tabContent("group-form-area", "New Group", data.html);
 		connectGroupForm();
 	});
@@ -104,11 +108,7 @@ $(function () {
 			var title = $("<span />").addClass("tab-name").text(label);
 			var close = $("<a />").addClass("tab-close").text("x");
 			close.click(function () {
-				var li = $(this).parent();
-				li.removeClass("active");
-				var key = li.attr('class');
-				li.remove();
-				$(".main-content section."+key).remove();
+				closeTab(this);
 				return false;
 			});
 			tab = $("<li />")
@@ -124,7 +124,7 @@ $(function () {
 			});
 			tabs.append(tab);
 		} else {
-			tab.text(label);
+			tab.find(".tab-name").text(label);
 		}
 		var mainsection = $(".main-content");
 		var section = mainsection.find("section."+key);
@@ -137,8 +137,26 @@ $(function () {
 		}
 	}
 
+	function closeTab (closebtn) {
+		var li = $(closebtn).parent();
+		if (li.is(".active")) {
+			var newactive = null;
+			if (!li.is(":last-child")) {
+				newactive = li.next();
+			} else if (!li.is(":first-child")) {
+				newactive = li.prev();
+			}
+			if (newactive) {
+				switchTab(newactive.attr('class'));
+			}
+		}
+		var key = li.attr('class');
+		li.remove();
+		$(".main-content section."+key).remove();
+	}
+
 	$(".nav-users").click(function () {
-		socket.emit('users');
+		socket.emit('userslist');
 		return false;
 	});
 

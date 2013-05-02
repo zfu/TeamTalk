@@ -1,14 +1,16 @@
 
 var TopicManager = require("./TopicManager"),
-	Util = require("./Util"),
+	utilSocket = require("./Util").Socket,
 	ejs = require("ejs");
 
 /**
  *
  * @constructor
  * @class TopicController
+ * @param app
  */
-var TopicController = function () {
+var TopicController = function (app) {
+	if (app) this._application = app;
 	this._manager = new TopicManager();
 };
 
@@ -21,18 +23,24 @@ TopicController.prototype = {
 	_manager : null,
 
 	/**
+	 * Reference to application
+	 * @type Application
+	 */
+	_application : null,
+
+	/**
 	 * Connect listeners to socket events
 	 * @param socket
 	 */
 	plugSocket : function (socket) {
 		// listen the topics page
-		Util.socketBind(socket, "topics", this.onTopics, this);
+		utilSocket.bind(socket, "topics", this.onTopics, this);
 		// listen the topic form
-		Util.socketBind(socket, "topicform", this.onTopicForm, this);
+		utilSocket.bind(socket, "topicform", this.onTopicForm, this);
 		// listen new topic
-		Util.socketBind(socket, "newtopic", this.onNewTopic, this);
+		utilSocket.bind(socket, "newtopic", this.onNewTopic, this);
 		// listen new topic
-		Util.socketBind(socket, "topic", this.onTopic, this);
+		utilSocket.bind(socket, "topic", this.onTopic, this);
 	},
 
 	/**

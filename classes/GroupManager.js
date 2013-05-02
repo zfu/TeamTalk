@@ -116,11 +116,19 @@ GroupManager.prototype = {
 	},
 
 	getGroupById : function (id, fn) {
-		GroupModel.find({_id : id},  fn);
+		GroupModel.find({_id : id}, function (err, result) {
+			if (err) fn(err);
+			else if (result.length > 0) fn(null, result[0]);
+			else fn(null, null);
+		});
 	},
 
 	getGroupByKey : function (key, fn) {
-		GroupModel.find({key : key},  fn);
+		GroupModel.find({key : key},  function (err, result) {
+			if (err) fn(err);
+			else if (result.length > 0) fn(null, result[0]);
+			else fn(null, null);
+		});
 	}
 
 };
